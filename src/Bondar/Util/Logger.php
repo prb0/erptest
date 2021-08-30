@@ -11,7 +11,7 @@ class Logger
      * @param \Throwable $e
      * @throws Exception
      */
-    public static function exception(\Throwable $e)
+    public static function exception(\Throwable $e): void
     {
         $message = 'Message: ' . $e->getMessage()       . static::LINE_DELIMITER;
         $message.= 'Trace: '   . $e->getTraceAsString() . static::LINE_DELIMITER;
@@ -23,7 +23,7 @@ class Logger
      * @param string $message
      * @throws Exception
      */
-    public static function info(string $message)
+    public static function info(string $message): void
     {
         static::log($message . static::LINE_DELIMITER, LOG_DIR_INFO);
     }
@@ -33,7 +33,7 @@ class Logger
      * @param string $logDir
      * @throws Exception
      */
-    private static function log(string $message, string $logDir)
+    private static function log(string $message, string $logDir): void
     {
         try {
             $dateTime    = DateService::instance();

@@ -10,7 +10,7 @@ class FileService
      * @param bool $recursive
      * @return bool
      */
-    public static function _mkdir(string $directory, int $permissions = 0444, bool $recursive = false)
+    public static function _mkdir(string $directory, int $permissions = 0444, bool $recursive = false): bool
     {
         return \mkdir($directory, $permissions, $recursive);
     }

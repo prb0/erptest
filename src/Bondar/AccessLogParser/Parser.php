@@ -44,6 +44,12 @@ class Parser
         'Bing',
         'Baidu',
     ];
+    /**
+     * @var string[]
+     */
+    private $excludedTrafficCodes = [
+        '301',
+    ];
 
     /**
      * @throws Exception
@@ -67,7 +73,7 @@ class Parser
      * @throws Exception
      * @throws Util\Exception
      */
-    public function parseData() : array
+    public function parseData(): array
     {
         Util\Logger::info('Start new job');
 
@@ -92,7 +98,7 @@ class Parser
             'views'       => $this->viewCount,
             'traffic'     => $this->traffic,
             'crawlers'    => $this->crawlers,
-            'statusCodes' => $this->statusCodes
+            'statusCodes' => $this->statusCodes,
         ];
 
         Util\Logger::info(print_r($result, true));
@@ -105,7 +111,7 @@ class Parser
      * @param string $line
      * @throws Util\Exception
      */
-    private function parseLine(string $line)
+    private function parseLine(string $line): void
     {
         $query = explode('"', $line);
 
@@ -117,22 +123,22 @@ class Parser
     }
 
     /**
-     * @param string $userAgent
-     * @return bool
+     * @param string $httpFragment
      */
-    private function isBot(string $userAgent): bool
+    private function parseUniqueUrl(string $httpFragment): void
     {
-        $pattern = '/(' . implode('|', $this->interestedCrawlers) .')/';
-        $this->_pregService->match($pattern, $userAgent);
+        $url = explode(' ', $httpFragment);
 
-        return $this->_pregService->isMatched();
+        if (!array_key_exists($url[1], $this->uniqueUrls)) {
+            $this->uniqueUrls[$url[1]] = null;
+        }
     }
 
     /**
      * @param string $userAgent
      * @throws Util\Exception
      */
-    private function parseBots(string $userAgent)
+    private function parseBots(string $userAgent): void
     {
         if ($this->isBot($userAgent)) {
             $botName = $this->_pregService->matchedValue();
@@ -144,7 +150,7 @@ class Parser
     /**
      * @param string $mixed
      */
-    private function parseStatusCodes(string $mixed)
+    private function parseStatusCodes(string $mixed): void
     {
         $url = explode(' ', $mixed);
 
@@ -158,22 +164,33 @@ class Parser
     /**
      * @param string $mixed
      */
-    private function parseTraffic(string $mixed)
+    private function parseTraffic(string $mixed): void
     {
         $url = explode(' ', $mixed);
 
-        $this->traffic += (int) $url[2];
+        if (!$this->isExcludedTraffic($url[1])) {
+            $this->traffic += (int) $url[2];
+        }
     }
 
     /**
-     * @param string $httpFragment
+     * @param string $code
+     * @return bool
      */
-    private function parseUniqueUrl(string $httpFragment)
+    private function isExcludedTraffic(string $code): bool
     {
-        $url = explode(' ', $httpFragment);
+        return in_array($code, $this->excludedTrafficCodes);
+    }
 
-        if (!array_key_exists($url[1], $this->uniqueUrls)) {
-            $this->uniqueUrls[$url[1]] = null;
-        }
+    /**
+     * @param string $userAgent
+     * @return bool
+     */
+    private function isBot(string $userAgent): bool
+    {
+        $pattern = '/(' . implode('|', $this->interestedCrawlers) .')/';
+        $this->_pregService->match($pattern, $userAgent);
+
+        return $this->_pregService->isMatched();
     }
 }

@@ -19,7 +19,7 @@ class PregService
      * @param string $haystack
      * @param int $flag
      */
-    public function match(string $pattern, string $haystack, int $flag = PREG_OFFSET_CAPTURE)
+    public function match(string $pattern, string $haystack, int $flag = PREG_OFFSET_CAPTURE): void
     {
         $this->numMatches = preg_match($pattern, $haystack, $this->matches, $flag);
     }
