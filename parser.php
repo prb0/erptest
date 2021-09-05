@@ -15,7 +15,7 @@ try {
 
     $path   = $argv[1];
     $parser = new Parser($path);
-    $result = $parser->parseData();
+    $result = $parser->parsedData();
 
     echo Util\JsonService::_json_encode($result);
 } catch (\Exception $e) {

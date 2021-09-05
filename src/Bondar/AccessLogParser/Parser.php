@@ -14,7 +14,6 @@ class Parser
      * @var Util\PregService
      */
     private $_pregService;
-
     /**
      * @var int
      */
@@ -22,7 +21,7 @@ class Parser
     /**
      * @var int
      */
-    private $viewCount = 0;
+    private $viewsCount = 0;
     /**
      * @var array
      */
@@ -52,6 +51,7 @@ class Parser
     ];
 
     /**
+     * @param string $pathToLog
      * @throws Exception
      */
     public function __construct(string $pathToLog)
@@ -73,36 +73,25 @@ class Parser
      * @throws Exception
      * @throws Util\Exception
      */
-    public function parseData(): array
+    public function parsedData(): array
     {
         Util\Logger::info('Start new job');
 
-        $handle = Util\FileService::_fopen($this->pathToLog, "r");
-
-        if ($handle === false) {
-            throw new Exception('File read problem');
+        foreach(Util\FileService::getLines($this->pathToLog) as $line) {
+            $this->parseLine($line);
         }
 
-        while (($query = Util\FileService::_fgets($handle)) !== false) {
-            $this->parseLine($query);
-        }
-
-        if (Util\FileService::_feof($handle) === false) {
-            throw new Exception('_fgets() crushed');
-        }
-
-        Util\FileService::_fclose($handle);
+        Util\Logger::info('Complete job');
 
         $result = [
             'urls'        => count($this->uniqueUrls),
-            'views'       => $this->viewCount,
+            'views'       => $this->viewsCount,
             'traffic'     => $this->traffic,
             'crawlers'    => $this->crawlers,
             'statusCodes' => $this->statusCodes,
         ];
 
         Util\Logger::info(print_r($result, true));
-        Util\Logger::info('Complete job');
 
         return $result;
     }
@@ -119,7 +108,7 @@ class Parser
         $this->parseTraffic($query[2]);
         $this->parseStatusCodes($query[2]);
         $this->parseBots($query[5]);
-        $this->viewCount++;
+        $this->viewsCount++;
     }
 
     /**
@@ -152,12 +141,12 @@ class Parser
      */
     private function parseStatusCodes(string $mixed): void
     {
-        $url = explode(' ', $mixed);
+        $mixed = explode(' ', $mixed);
 
-        if (array_key_exists($url[1], $this->statusCodes)) {
-            $this->statusCodes[$url[1]]++;
+        if (array_key_exists($mixed[1], $this->statusCodes)) {
+            $this->statusCodes[$mixed[1]]++;
         } else {
-            $this->statusCodes[$url[1]] = 1;
+            $this->statusCodes[$mixed[1]] = 1;
         }
     }
 
@@ -166,10 +155,10 @@ class Parser
      */
     private function parseTraffic(string $mixed): void
     {
-        $url = explode(' ', $mixed);
+        $mixed = explode(' ', $mixed);
 
-        if (!$this->isExcludedTraffic($url[1])) {
-            $this->traffic += (int) $url[2];
+        if (!$this->isExcludedTraffic($mixed[1])) {
+            $this->traffic += (int) $mixed[2];
         }
     }
 

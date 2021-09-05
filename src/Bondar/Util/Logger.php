@@ -2,16 +2,18 @@
 
 namespace Bondar\Util;
 
+use Throwable;
+
 class Logger
 {
     const LINE_DELIMITER  = PHP_EOL;
     const BLOCK_DELIMITER = '===============================================' . PHP_EOL;
 
     /**
-     * @param \Throwable $e
+     * @param Throwable $e
      * @throws Exception
      */
-    public static function exception(\Throwable $e): void
+    public static function exception(Throwable $e): void
     {
         $message = 'Message: ' . $e->getMessage()       . static::LINE_DELIMITER;
         $message.= 'Trace: '   . $e->getTraceAsString() . static::LINE_DELIMITER;

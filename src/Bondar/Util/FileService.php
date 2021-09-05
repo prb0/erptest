@@ -2,8 +2,34 @@
 
 namespace Bondar\Util;
 
+use Generator;
+
 class FileService
 {
+    /**
+     * @param string $path
+     * @return Generator
+     * @throws Exception
+     */
+    public static function getLines(string $path): Generator
+    {
+        $handle = static::_fopen($path, "r");
+
+        if ($handle === false) {
+            throw new Exception('File read problem');
+        }
+
+        while (($line = static::_fgets($handle)) !== false) {
+            yield $line;
+        }
+
+        if (static::_feof($handle) === false) {
+            throw new Exception('_fgets() crushed');
+        }
+
+        static::_fclose($handle);
+    }
+
     /**
      * @param string $directory
      * @param int $permissions
@@ -39,7 +65,7 @@ class FileService
      * @param string $path
      * @param string $data
      * @param int $flag
-     * @return int|bool
+     * @return false|int
      */
     public static function _file_put_contents(string $path, string $data, int $flag = FILE_APPEND)
     {
